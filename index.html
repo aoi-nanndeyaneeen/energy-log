@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'none'">
+<title>エネルギー記録</title>
+<meta name="theme-color" content="#16233a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="エネルギー記録">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="./styles.css">
+<script type="module" src="./app.js"></script>
+</head>
+<body>
+
+<main id="main">
+
+  <!-- ============ 記録 ============ -->
+  <section class="tab-panel" id="panel-record" aria-labelledby="tab-record">
+    <div class="banner hidden" id="backup-banner">
+      <span id="backup-banner-text">バックアップしましょう</span>
+      <button type="button" class="banner-btn" id="backup-banner-go">設定へ</button>
+    </div>
+
+    <h1 class="page-title">記録</h1>
+
+    <div class="seg" role="group" aria-label="入力の種類">
+      <button type="button" class="seg-btn is-on" id="mode-entry" aria-pressed="true">活動を書く</button>
+      <button type="button" class="seg-btn" id="mode-day" aria-pressed="false">山と谷だけ書く</button>
+    </div>
+
+    <!-- 日付 -->
+    <div class="field">
+      <div class="field-label">日付</div>
+      <div class="chips" id="date-quick">
+        <button type="button" class="chip" data-quick="today">今日</button>
+        <button type="button" class="chip" data-quick="yesterday">昨日</button>
+      </div>
+      <input type="date" id="date-input" class="input" aria-label="日付を選ぶ">
+    </div>
+
+    <!-- ---- 活動フォーム ---- -->
+    <form id="entry-form" novalidate>
+      <div class="field">
+        <div class="field-label">時間帯</div>
+        <div class="chips" id="slot-chips" role="group" aria-label="時間帯"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="activity-input">活動<span class="req">必須</span></label>
+        <input type="text" id="activity-input" class="input" autocomplete="off"
+               enterkeyhint="done" placeholder="例: 化学の自習">
+      </div>
+
+      <div class="field">
+        <div class="field-label">夢中度<span class="req">必須</span></div>
+        <div class="chips grid5" id="engagement-chips" role="group" aria-label="夢中度"></div>
+        <div class="hint"><span>1 上の空</span><span>5 我を忘れた</span></div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">エネルギー<span class="req">必須</span></div>
+        <div class="chips grid3" id="energy-chips" role="group" aria-label="エネルギー"></div>
+        <div class="hint"><span>↓ 減った</span><span>↑ 増えた</span></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="note-input">ひとこと</label>
+        <input type="text" id="note-input" class="input" autocomplete="off"
+               enterkeyhint="done" placeholder="任意">
+      </div>
+
+      <details class="details" id="entry-details">
+        <summary>詳細（場所・誰と・タグ）</summary>
+        <div class="field">
+          <label class="field-label" for="place-input">場所</label>
+          <input type="text" id="place-input" class="input" autocomplete="off" placeholder="例: 図書館">
+        </div>
+        <div class="field">
+          <label class="field-label" for="with-input">誰と</label>
+          <input type="text" id="with-input" class="input" autocomplete="off" placeholder="例: 一人">
+        </div>
+        <div class="field">
+          <label class="field-label" for="tags-input">タグ</label>
+          <input type="text" id="tags-input" class="input" autocomplete="off"
+                 placeholder="空白かカンマ区切り（例: 勉強 化学）">
+        </div>
+      </details>
+
+      <p class="form-error hidden" id="entry-error" role="alert"></p>
+
+      <div class="actions">
+        <button type="submit" class="btn primary" id="entry-save">保存</button>
+        <button type="button" class="btn ghost hidden" id="entry-cancel">編集をやめる</button>
+        <button type="button" class="btn danger hidden" id="entry-delete">削除</button>
+      </div>
+    </form>
+
+    <!-- ---- 山と谷フォーム ---- -->
+    <form id="day-form" class="hidden" novalidate>
+      <div class="field">
+        <label class="field-label" for="peak-input">一番よかった瞬間</label>
+        <input type="text" id="peak-input" class="input" autocomplete="off" placeholder="山">
+      </div>
+      <div class="field">
+        <label class="field-label" for="dip-input">一番しんどかった瞬間</label>
+        <input type="text" id="dip-input" class="input" autocomplete="off" placeholder="谷">
+      </div>
+      <label class="checkbox">
+        <input type="checkbox" id="flat-input">
+        <span>平坦な一日だった</span>
+      </label>
+      <div class="actions">
+        <button type="submit" class="btn primary">保存</button>
+      </div>
+    </form>
+
+    <h2 class="section-title" id="today-title">この日の記録</h2>
+    <div id="today-list" class="list"></div>
+  </section>
+
+  <!-- ============ 履歴 ============ -->
+  <section class="tab-panel hidden" id="panel-history" aria-labelledby="tab-history">
+    <h1 class="page-title">履歴</h1>
+    <div id="history-list" class="list"></div>
+    <div class="actions">
+      <button type="button" class="btn ghost hidden" id="history-more">さらに表示</button>
+    </div>
+  </section>
+
+  <!-- ============ 振り返り ============ -->
+  <section class="tab-panel hidden" id="panel-review" aria-labelledby="tab-review">
+    <h1 class="page-title">振り返り</h1>
+    <div class="card muted">
+      <p>集計と週次の振り返りは <strong>M3</strong> で作ります。</p>
+      <p>データが3〜4週ぶんたまってから、計画書 6.3 と 8章（stats.js）を実装してください。</p>
+      <p class="mini">いまの記録件数：<span id="review-count">-</span> 件</p>
+    </div>
+  </section>
+
+  <!-- ============ 設定 ============ -->
+  <section class="tab-panel hidden" id="panel-settings" aria-labelledby="tab-settings">
+    <h1 class="page-title">設定</h1>
+
+    <div class="card">
+      <h2 class="card-title">バックアップ</h2>
+      <p class="mini" id="backup-status">-</p>
+      <div class="actions column">
+        <button type="button" class="btn primary" id="export-json">JSONをエクスポート（全データ）</button>
+        <button type="button" class="btn" id="export-csv">CSVをエクスポート（活動のみ）</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">JSONインポート</h2>
+      <div class="radios" role="radiogroup" aria-label="インポートの方法">
+        <label class="radio"><input type="radio" name="import-mode" value="merge" checked><span>統合（同じidは新しいほうを残す）</span></label>
+        <label class="radio"><input type="radio" name="import-mode" value="replace"><span>置き換え（いまのデータを消す）</span></label>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="import-json-btn">ファイルを選ぶ</button>
+      </div>
+      <input type="file" id="import-json-file" accept="application/json,.json" class="hidden-input">
+      <p class="mini" id="import-json-result"></p>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">メモ取り込み</h2>
+      <p class="mini">メモアプリの内容を貼り付けます。形式は計画書7章のとおり。</p>
+      <textarea id="memo-input" class="input textarea" rows="8" spellcheck="false"
+                placeholder="# 2026-09-29&#10;午前|化学の自習|4|↑|反応のしくみがつながった&#10;山: 化学がつながった瞬間"></textarea>
+      <div class="actions">
+        <button type="button" class="btn" id="memo-preview">下読みする</button>
+        <button type="button" class="btn primary" id="memo-import">取り込む</button>
+      </div>
+      <pre class="report" id="memo-result"></pre>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">保存の状態</h2>
+      <p class="mini" id="persist-status">-</p>
+      <p class="mini" id="estimate-status">-</p>
+      <div class="actions">
+        <button type="button" class="btn" id="persist-request">永続化を要求</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">このアプリについて</h2>
+      <p class="mini">記録は端末の中（IndexedDB）だけに保存され、外には出ません。</p>
+      <p class="mini">週に1回、JSONエクスポートをバックアップとして残してください。</p>
+      <p class="mini" id="version-line"></p>
+    </div>
+
+    <div class="card danger-card">
+      <h2 class="card-title">全データ削除</h2>
+      <p class="mini">取り消せません。先にエクスポートしてください。</p>
+      <div class="actions">
+        <button type="button" class="btn danger" id="wipe-all">すべて削除</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<nav class="tabbar" id="tabbar" aria-label="画面の切り替え">
+  <button type="button" class="tab is-on" id="tab-record"   data-tab="record"   aria-pressed="true">記録</button>
+  <button type="button" class="tab"       id="tab-history"  data-tab="history"  aria-pressed="false">履歴</button>
+  <button type="button" class="tab"       id="tab-review"   data-tab="review"   aria-pressed="false">振り返り</button>
+  <button type="button" class="tab"       id="tab-settings" data-tab="settings" aria-pressed="false">設定</button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+# エクスポートしたバックアップは絶対にコミットしない（記録そのものが入っている）
+energy-log-*.json
+energy-log-*.csv
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+.vscode/
