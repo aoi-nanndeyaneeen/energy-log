@@ -364,6 +364,11 @@ body {
   font-size: 0.85rem;
 }
 
+.banner.warn {
+  border-color: var(--down);
+  align-items: flex-start;
+}
+
 .banner-btn {
   margin-left: auto;
   min-height: 36px;

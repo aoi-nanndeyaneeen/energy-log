@@ -569,6 +569,36 @@ async function refreshAfterBulkChange() {
 }
 
 // =====================================================================
+// 「アイコンから開いてください」の警告
+// =====================================================================
+// iPhone では、ブラウザのタブで開いたときとホーム画面のアイコンから開いたときとで
+// 保存先が別扱いになる。タブで記録してしまう事故を防ぐ。
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+}
+
+/** スマホらしい端末か（PCでの開発中には出さない） */
+function looksLikePhone() {
+  return navigator.maxTouchPoints > 0 && window.matchMedia('(max-width: 820px)').matches;
+}
+
+function renderStandaloneBanner() {
+  const banner = $('standalone-banner');
+  if (isStandalone() || !looksLikePhone()) return banner.classList.add('hidden');
+
+  let dismissed = false;
+  try { dismissed = sessionStorage.getItem('hideStandaloneBanner') === '1'; } catch { /* 使えない環境 */ }
+  if (dismissed) return banner.classList.add('hidden');
+
+  $('standalone-banner-text').textContent =
+    'ブラウザのタブで開いています。ここで記録しても、ホーム画面のアイコンから開いたときには見えません。'
+    + '共有 →「ホーム画面に追加」をして、アイコンから開いてください。';
+  banner.classList.remove('hidden');
+}
+
+// =====================================================================
 // バックアップの催促
 // =====================================================================
 
@@ -644,6 +674,10 @@ function bindEvents() {
   });
 
   $('backup-banner-go').addEventListener('click', () => setTab('settings'));
+  $('standalone-banner-close').addEventListener('click', () => {
+    $('standalone-banner').classList.add('hidden');
+    try { sessionStorage.setItem('hideStandaloneBanner', '1'); } catch { /* 使えない環境 */ }
+  });
 
   $('export-json').addEventListener('click', exportJson);
   $('export-csv').addEventListener('click', exportCsv);
@@ -684,6 +718,7 @@ async function init() {
   setMode('entry');
   clearEntryForm();
   await setDate(todayKey());
+  renderStandaloneBanner();
   await renderBackupBanner();
   setTab('record');
   registerServiceWorker();

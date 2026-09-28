@@ -1,5 +1,5 @@
 // オフライン用キャッシュ。リリースのたびに CACHE の番号を上げる。
-const CACHE = 'energy-log-v1';
+const CACHE = 'energy-log-v2';
 
 const ASSETS = [
   './',
